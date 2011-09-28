@@ -1,0 +1,3 @@
+# Module vietutilities
+# RPC service class, partial path of RPC policy file
+com.khanhlnq.vietutilities.client.GreetingService, 64EA249FC46CCD911259CEBDF612E205.gwt.rpc

@@ -1,0 +1,2 @@
+serviceClass: com.khanhlnq.vietutilities.client.GreetingService
+path: 64EA249FC46CCD911259CEBDF612E205.gwt.rpc

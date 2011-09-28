@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+<script type="text/javascript">
+	function dec2hex ( textString ) {
+		return (textString+0).toString(16).toUpperCase();
+		}
+
+	function  dec2hex2 ( textString ) {
+		var hexequiv = new Array ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F");
+		return hexequiv[(textString >> 4) & 0xF] + hexequiv[textString & 0xF];
+		}
+
+	function convertChar2CP ( textString ) {
+		var haut = 0;
+		var n = 0;
+		var CPstring = '';
+		for (var i = 0; i < textString.length; i++) {
+			var b = textString.charCodeAt(i);
+			if (b < 0 || b > 0xFFFF) {
+				CPstring += 'Error in convertChar2CP: byte out of range ' + dec2hex(b) + '!';
+				}
+			if (haut != 0) {
+				if (0xDC00 <= b && b <= 0xDFFF) {
+					CPstring += dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00)) + ' ';
+					haut = 0;
+					continue;
+					}
+				else {
+					CPstring += 'Error in convertChar2CP: surrogate out of range ' + dec2hex(haut) + '!';
+					haut = 0;
+					}
+				}
+			if (0xD800 <= b && b <= 0xDBFF) {
+				haut = b;
+				}
+			else {
+				CPstring += dec2hex(b) + ' ';
+				}
+			}
+		return CPstring.substring(0, CPstring.length-1);
+		}
+
+	function convertCharStr2pEsc(str) {
+		// str: sequence of Unicode characters
+		var outputString = "";
+		var CPstring = convertChar2CP(str);
+		if (str.length == 0) {
+			return "";
+		}
+		// process each codepoint
+		var listArray = CPstring.split(' ');
+		for ( var i = 0; i < listArray.length; i++) {
+			var n = parseInt(listArray[i], 16);
+			//if (i > 0) { outputString += ' ';}
+			if (n == 0x20) {
+				outputString += '%20';
+			} else if (n >= 0x41 && n <= 0x5A) {
+				outputString += String.fromCharCode(n);
+			} // alpha
+			else if (n >= 0x61 && n <= 0x7A) {
+				outputString += String.fromCharCode(n);
+			} // alpha
+			else if (n >= 0x30 && n <= 0x39) {
+				outputString += String.fromCharCode(n);
+			} // digits
+			else if (n == 0x2D || n == 0x2E || n == 0x5F || n == 0x7E) {
+				outputString += String.fromCharCode(n);
+			} // - . _ ~
+			else if (n <= 0x7F) {
+				outputString += '%' + dec2hex2(n);
+			} else if (n <= 0x7FF) {
+				outputString += '%' + dec2hex2(0xC0 | ((n >> 6) & 0x1F)) + '%'
+						+ dec2hex2(0x80 | (n & 0x3F));
+			} else if (n <= 0xFFFF) {
+				outputString += '%' + dec2hex2(0xE0 | ((n >> 12) & 0x0F)) + '%'
+						+ dec2hex2(0x80 | ((n >> 6) & 0x3F)) + '%'
+						+ dec2hex2(0x80 | (n & 0x3F));
+			} else if (n <= 0x10FFFF) {
+				outputString += '%' + dec2hex2(0xF0 | ((n >> 18) & 0x07)) + '%'
+						+ dec2hex2(0x80 | ((n >> 12) & 0x3F)) + '%'
+						+ dec2hex2(0x80 | ((n >> 6) & 0x3F)) + '%'
+						+ dec2hex2(0x80 | (n & 0x3F));
+			} else {
+				outputString += '!Error ' + dec2hex(n) + '!';
+			}
+		}
+		return (outputString);
+	}
+
+	function doEncode() {
+
+		var strInput = document.getElementById('urlTxt').value;
+
+		document.getElementById('encodedURL').innerHTML = "<a href='http://vietutilities.appspot.com/stripdiacritics?url=" + convertCharStr2pEsc(strInput) + "'>" + "http://vietutilities.appspot.com/stripdiacritics?url=" + convertCharStr2pEsc(strInput) + "</a>";
+	}
+
+</script>
+
+<title>L&#432;&#7907;c b&#7887; d&#7845;u ti&#7871;ng Vi&#7879;t
+	trong n&#7897;i dung l&#7845;y t&#7915; URL</title>
+
+</head>
+
+<!--                                           -->
+<!-- The body can have arbitrary html, or      -->
+<!-- you can leave the body empty if you want  -->
+<!-- to create a completely dynamic UI.        -->
+<!--                                           -->
+<body>
+
+	<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+	<noscript>
+		<div
+			style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+			Tr&#236;nh duy&#7879;t c&#7847;n ph&#7843;i &#273;&#432;&#7907;c
+			b&#7853;t JavaScript.</div>
+	</noscript>
+
+	<h1 align="center">L&#432;&#7907;c b&#7887; d&#7845;u ti&#7871;ng Vi&#7879;t
+		trong n&#7897;i dung l&#7845;y t&#7915; URL</h1>
+
+	<table align="center" width="480px">
+		<tr>
+			<td colspan="2" style="font-weight: bold;">Nh&#7853;p URL
+				c&#7847;n l&#7845;y n&#7897;i dung:</td>
+		</tr>
+		<tr>
+			<td><input type="text" id="urlTxt" size="50" /></td>
+		</tr>
+		<tr>
+			<td width="240px">URL &#273;&#227; chuy&#7875;n &#273;&#7893;i <span id="encodedURL" style="white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word"></span></td>
+		</tr>
+		<tr>
+			<td><input type="button" id="convertURLbut" onclick="doEncode()" value="Convert" /></td>
+		</tr>
+	</table>
+</body>
+</html>
